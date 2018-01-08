@@ -45,3 +45,14 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+*.rpyb
+*.rpyc
+*.png
+game/gui.rpy
+game/screens.rpy
+*.rpym
+game/tl/None/common.rpymc
+game/saves/persistent
+game/options.rpy
+log.txt
+*.txt
