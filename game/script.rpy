@@ -3,6 +3,7 @@
     from _enum import Enum
     Skill = Enum('Skill','FIGHTING STEALTH')
     Resource = Enum('Resource','MONEY ENERGY')
+    diceType = 10
     class Card:
         def __init__(self, data):
             self.text = data['text']
@@ -17,7 +18,9 @@
     class Danger(Card):
         def __init__(self, data):
             Card.__init__(self, data)
-            self.chance = data['chance']
+            self.difficulty = data['difficulty']
+            self.skill = Skill[data['skill']]
+            self.reward = loadReward(data['reward'])
     class Reward():
         def __init__(self, data):
             self.text = data['text']
@@ -50,6 +53,9 @@
     def adjustResource(resource, amount):
         resources[resource] += amount
         renpy.say(None, resource.name + " changed by " + str(amount))
+    def tryChallenge(skill, difficulty):
+        result = skills[skill] + renpy.random.randint(0, diceType)
+        return result >= difficulty
     skills = {}
     for skill in Skill:
         skills[skill] = 0
@@ -79,6 +85,9 @@ label runOpportunity(opportunity):
     
 label runDanger(danger):
     python:
-        renpy.say(None, danger.chance)
+        renpy.say(None, danger.text)
+        result = tryChallenge(danger.skill, danger.difficulty)
+        if result:
+            gainReward(opportunity.reward)  
     return
 
