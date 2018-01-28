@@ -57,3 +57,4 @@ game/options.rpy
 log.txt
 *.txt
 game/_enum.py
+*.save
