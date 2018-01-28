@@ -3,7 +3,17 @@
     from _enum import Enum
     SKILL = Enum('Skill','FIGHTING STEALTH')
     RESOURCE = Enum('Resource','MONEY ENERGY')
-    diceType = 10
+    DICETYPE = 10
+    INIT_SKILL = 0
+    INIT_RESOURCE = 100
+    class CharacterData:
+       def __init__(self, data):
+            self.skills = {}
+            self.resources = {}
+            for skill in SKILL:
+                self.skills[skill] = INIT_SKILL
+            for resource in RESOURCE:
+                self.resources[resource] = INIT_RESOURCE
     class Card:
         def __init__(self, data):
             self.text = data['text']
@@ -44,24 +54,18 @@
         if data['type'] == 'resourceReward':
             reward = ResourceReward(data)
         return reward
-    def gainReward(reward):
+    def gainReward(characterData, reward):
         if isinstance(reward, ResourceReward):
-            gainResourceReward(reward)
+            gainResourceReward(characterData, reward)
         return reward
-    def gainResourceReward(reward):
-        adjustResource(reward.resource,reward.amount)
-    def adjustResource(resource, amount):
-        resources[resource] += amount
+    def gainResourceReward(characterData, reward):
+        adjustResource(characterData, reward.resource,reward.amount)
+    def adjustResource(characterData, resource, amount):
+        characterData.resources[resource] += amount
         renpy.say(None, resource.name + " changed by " + str(amount))
-    def tryChallenge(skill, difficulty):
-        result = skills[skill] + renpy.random.randint(0, diceType)
+    def tryChallenge(characterData, skill, difficulty):
+        result = characterData.skills[skill] + renpy.random.randint(0, DICETYPE)
         return result >= difficulty
-    skills = {}
-    for skill in SKILL:
-        skills[skill] = 0
-    resources = {}
-    for resource in RESOURCE:
-        resources[resource] = 100
     opportunityList = []
     dangerList = []
     loadCards()
@@ -70,24 +74,25 @@ label start:
     python:
         opportunity = drawFromList(opportunityList)
         danger = drawFromList(dangerList)
-    call runOpportunity(opportunity)
-    call runDanger(danger)
+        mainCharacter = CharacterData({})
+    call runOpportunity(opportunity, mainCharacter)
+    call runDanger(danger, mainCharacter)
     return
 
-label runOpportunity(opportunity):
+label runOpportunity(opportunity, characterData):
     python:
         renpy.say(None, opportunity.text)
         result = renpy.display_menu([("Spend " + str(opportunity.amount) + " " + opportunity.resource.name.lower() + "?", None),("Yes", True),("No", False)])
         if result:
-            adjustResource(opportunity.resource,-opportunity.amount)
-            gainReward(opportunity.reward)
+            adjustResource(characterData, opportunity.resource,-opportunity.amount)
+            gainReward(characterData, opportunity.reward)
     return
     
-label runDanger(danger):
+label runDanger(danger, characterData):
     python:
         renpy.say(None, danger.text)
-        result = tryChallenge(danger.skill, danger.difficulty)
+        result = tryChallenge(characterData, danger.skill, danger.difficulty)
         if result:
-            gainReward(opportunity.reward)  
+            gainReward(characterData, opportunity.reward)  
     return
 
