@@ -12,6 +12,8 @@
             self.opportunityList = []
             self.dangerList = []
             self.name = data['name']
+            self.x = data['x']
+            self.y = data['y']
             for card in data['cards']:
                 if card['type'] == 'opportunity':
                     self.opportunityList.append(Opportunity(card))
@@ -94,17 +96,19 @@
         renpy.say(None, resource.name + " changed by " + str(amount))
     def tryChallenge(characterData, skill, difficulty):
         result = characterData.skills[skill] + renpy.random.randint(0, DICETYPE)
-        return result >= difficulty
+        return result >= difficulty     
     loadLocations()
 
 label start:
+    call screen locationMap(LOCATIONS)
+    return
+
+label tryLocation(character, location):
     python:
-        location = LOCATIONS[0]
         opportunity = drawFromList(location.opportunityList)
         danger = drawFromList(location.dangerList)
-        mainCharacter = CharacterData({})
-    call runOpportunity(opportunity, mainCharacter)
-    call runDanger(danger, mainCharacter)
+    call runOpportunity(opportunity, character)
+    call runDanger(danger, character)
     return
 
 label runOpportunity(opportunity, characterData):
