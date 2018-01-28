@@ -31,12 +31,21 @@
             self.difficulty = data['difficulty']
             self.skill = SKILL[data['skill']]
             self.reward = loadReward(data['reward'])
+            self.loss = loadLoss(data['loss'])
     class Reward():
         def __init__(self, data):
             self.text = data['text']
     class ResourceReward(Reward):
         def __init__(self, data):
             Reward.__init__(self, data)
+            self.resource = RESOURCE[data['resource']]
+            self.amount = data['amount']
+    class Loss():
+        def __init__(self, data):
+            self.text = data['text']
+    class ResourceLoss(Loss):
+        def __init__(self, data):
+            Loss.__init__(self, data)
             self.resource = RESOURCE[data['resource']]
             self.amount = data['amount']
     def drawFromList(list):
@@ -54,12 +63,24 @@
         if data['type'] == 'resourceReward':
             reward = ResourceReward(data)
         return reward
+    def loadLoss(data):
+        if data['type'] == 'resourceLoss':
+            loss = ResourceLoss(data)
+        return loss
     def gainReward(characterData, reward):
+        renpy.say(None, reward.text)
         if isinstance(reward, ResourceReward):
             gainResourceReward(characterData, reward)
         return reward
     def gainResourceReward(characterData, reward):
         adjustResource(characterData, reward.resource,reward.amount)
+    def takeLoss(characterData, loss):
+        renpy.say(None, loss.text)
+        if isinstance(loss, ResourceLoss):
+            takeResourceLoss(characterData, loss)
+        return loss
+    def takeResourceLoss(characterData, loss):
+        adjustResource(characterData, loss.resource, -loss.amount)
     def adjustResource(characterData, resource, amount):
         characterData.resources[resource] += amount
         renpy.say(None, resource.name + " changed by " + str(amount))
@@ -93,6 +114,8 @@ label runDanger(danger, characterData):
         renpy.say(None, danger.text)
         result = tryChallenge(characterData, danger.skill, danger.difficulty)
         if result:
-            gainReward(characterData, opportunity.reward)  
+            gainReward(characterData, danger.reward)
+        else:
+            takeLoss(characterData, danger.loss)
     return
 
