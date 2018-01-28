@@ -6,6 +6,17 @@
     DICETYPE = 10
     INIT_SKILL = 0
     INIT_RESOURCE = 100
+    LOCATIONS = []
+    class Location:
+       def __init__(self, data):
+            self.opportunityList = []
+            self.dangerList = []
+            self.name = data['name']
+            for card in data['cards']:
+                if card['type'] == 'opportunity':
+                    self.opportunityList.append(Opportunity(card))
+                elif card['type'] == 'danger':
+                    self.dangerList.append(Danger(card))
     class CharacterData:
        def __init__(self, data):
             self.skills = {}
@@ -51,14 +62,11 @@
     def drawFromList(list):
         rnd = renpy.random.randint(0, len(list) - 1)
         return list[rnd]
-    def loadCards():
+    def loadLocations():
         testFile = renpy.file('test.txt')
-        cards = json.load(testFile)
-        for card in cards:
-            if card['type'] == 'opportunity':
-                opportunityList.append(Opportunity(card))
-            elif card['type'] == 'danger':
-                dangerList.append(Danger(card))
+        locationData = json.load(testFile)
+        for location in locationData:
+            LOCATIONS.append(Location(location))
     def loadReward(data):
         if data['type'] == 'resourceReward':
             reward = ResourceReward(data)
@@ -87,14 +95,13 @@
     def tryChallenge(characterData, skill, difficulty):
         result = characterData.skills[skill] + renpy.random.randint(0, DICETYPE)
         return result >= difficulty
-    opportunityList = []
-    dangerList = []
-    loadCards()
+    loadLocations()
 
 label start:
     python:
-        opportunity = drawFromList(opportunityList)
-        danger = drawFromList(dangerList)
+        location = LOCATIONS[0]
+        opportunity = drawFromList(location.opportunityList)
+        danger = drawFromList(location.dangerList)
         mainCharacter = CharacterData({})
     call runOpportunity(opportunity, mainCharacter)
     call runDanger(danger, mainCharacter)
