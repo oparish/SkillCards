@@ -6,7 +6,12 @@
     DICETYPE = 10
     INIT_SKILL = 0
     INIT_RESOURCE = 100
-    LOCATIONS = []
+    DUNGEONS = []
+    class Dungeon:
+        def __init__(self, data):
+            self.locations = []
+            for locationData in data['locations']:
+                self.locations.append(Location(locationData))
     class Location:
        def __init__(self, data):
             self.opportunityList = []
@@ -51,8 +56,8 @@
     class Trial(Card):
         def __init__(self, data):
             Card.__init__(self, data)
-                self.difficulty = data['difficulty']
-                self.skill = SKILL[data['skill']]
+            self.difficulty = data['difficulty']
+            self.skill = SKILL[data['skill']]
     class Reward():
         def __init__(self, data):
             self.text = data['text']
@@ -72,11 +77,11 @@
     def drawFromList(list):
         rnd = renpy.random.randint(0, len(list) - 1)
         return list[rnd]
-    def loadLocations():
+    def loadDungeons():
         testFile = renpy.file('test.txt')
-        locationData = json.load(testFile)
-        for location in locationData:
-            LOCATIONS.append(Location(location))
+        dungeons = json.load(testFile)
+        for dungeonData in dungeons:
+            DUNGEONS.append(Dungeon(dungeonData))
     def loadReward(data):
         if data['type'] == 'resourceReward':
             reward = ResourceReward(data)
@@ -105,10 +110,10 @@
     def tryChallenge(characterData, skill, difficulty):
         result = characterData.skills[skill] + renpy.random.randint(0, DICETYPE)
         return result >= difficulty     
-    loadLocations()
+    loadDungeons()
 
 label start:
-    call screen locationMap(LOCATIONS)
+    call screen locationMap(DUNGEONS[0].locations)
     return
 
 label tryLocation(character, location):
