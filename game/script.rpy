@@ -11,6 +11,7 @@
        def __init__(self, data):
             self.opportunityList = []
             self.dangerList = []
+            self.trialList = []
             self.name = data['name']
             self.x = data['x']
             self.y = data['y']
@@ -19,6 +20,8 @@
                     self.opportunityList.append(Opportunity(card))
                 elif card['type'] == 'danger':
                     self.dangerList.append(Danger(card))
+                elif card['type'] == 'trial':
+                    self.trialList.append(Trial(card))
     class CharacterData:
        def __init__(self, data):
             self.skills = {}
@@ -45,6 +48,11 @@
             self.skill = SKILL[data['skill']]
             self.reward = loadReward(data['reward'])
             self.loss = loadLoss(data['loss'])
+    class Trial(Card):
+        def __init__(self, data):
+            Card.__init__(self, data)
+                self.difficulty = data['difficulty']
+                self.skill = SKILL[data['skill']]
     class Reward():
         def __init__(self, data):
             self.text = data['text']
